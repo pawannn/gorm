@@ -220,3 +220,32 @@ type embeddedNamer struct {
 	Table string
 	Namer
 }
+
+func SplitTagCommas(s string) []string {
+	var (
+		parts   []string
+		current strings.Builder
+		depth   int
+	)
+	for _, r := range s {
+		switch r {
+		case '(':
+			depth++
+			current.WriteRune(r)
+		case ')':
+			depth--
+			current.WriteRune(r)
+		case ',':
+			if depth == 0 {
+				parts = append(parts, current.String())
+				current.Reset()
+			} else {
+				current.WriteRune(r)
+			}
+		default:
+			current.WriteRune(r)
+		}
+	}
+	parts = append(parts, current.String()) // always append, even if empty
+	return parts
+}

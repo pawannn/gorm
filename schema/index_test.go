@@ -3,7 +3,9 @@ package schema_test
 import (
 	"sync"
 	"testing"
+	"time"
 
+	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 	"gorm.io/gorm/utils/tests"
 )
@@ -271,5 +273,34 @@ func CheckIndices(t *testing.T, expected, actual []*schema.Index) {
 				tests.AssertObjEqual(t, af, ef, "Name", "Unique", "UniqueIndex", "Expression", "Sort", "Collate", "Length", "NotNull")
 			}
 		})
+	}
+}
+
+func TestIndexOptionWithMultipleIncludeColumns(t *testing.T) {
+	type Item struct {
+		gorm.Model
+		Status    string
+		Friendly  string
+		CreatedAt time.Time `gorm:"index:idx_created,option:INCLUDE (status, friendly)"`
+	}
+
+	s, err := schema.Parse(&Item{}, &sync.Map{}, schema.NamingStrategy{})
+	if err != nil {
+		t.Fatalf("failed to parse schema: %v", err)
+	}
+
+	indexes := s.ParseIndexes()
+
+	var idx schema.Index
+
+	for _, index := range indexes {
+		if index.Name == "idx_created" {
+			idx = *index
+		}
+	}
+
+	want := "INCLUDE (status, friendly)"
+	if idx.Option != want {
+		t.Errorf("expected Option = %q, got %q", want, idx.Option)
 	}
 }
