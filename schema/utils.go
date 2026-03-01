@@ -221,7 +221,7 @@ type embeddedNamer struct {
 	Namer
 }
 
-func SplitTagCommas(s string) []string {
+func splitTagCommas(s string) []string {
 	var (
 		parts   []string
 		current strings.Builder
