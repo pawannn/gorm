@@ -233,7 +233,9 @@ func splitTagCommas(s string) []string {
 			depth++
 			current.WriteRune(r)
 		case ')':
-			depth--
+			if depth > 0 {
+				depth--
+			}
 			current.WriteRune(r)
 		case ',':
 			if depth == 0 {
@@ -246,6 +248,6 @@ func splitTagCommas(s string) []string {
 			current.WriteRune(r)
 		}
 	}
-	parts = append(parts, current.String()) // always append, even if empty
+	parts = append(parts, current.String())
 	return parts
 }
