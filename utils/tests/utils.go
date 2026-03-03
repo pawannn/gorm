@@ -131,12 +131,18 @@ func AssertIndexOption(t *testing.T, model interface{}, indexName, wantOption st
 		t.Fatalf("failed to parse schema: %v", err)
 	}
 
+	var found bool
 	var idx schema.Index
 	for _, index := range s.ParseIndexes() {
 		if index.Name == indexName {
 			idx = *index
+			found = true
 			break
 		}
+	}
+
+	if !found {
+		t.Fatalf("index %q not found", indexName)
 	}
 
 	if idx.Option != wantOption {
